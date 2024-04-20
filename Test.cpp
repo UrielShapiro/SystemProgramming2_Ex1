@@ -1,6 +1,7 @@
 #include "doctest.h"
 #include "Algorithms.hpp"
 #include "Graph.hpp"
+#include <vector>
 
 using namespace std;
 
