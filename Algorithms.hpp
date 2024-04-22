@@ -1,3 +1,4 @@
+#include <string>
 namespace ariel
 {
     class Algorithms
