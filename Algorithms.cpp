@@ -33,7 +33,7 @@ class Algorithms
     //     }
     // }
 
-    static bool relax(Graph g, int v, int u, vector<int> &distance)
+    static bool relax(Graph g, size_t v, size_t u, vector<int> &distance)
     {
         if (distance[u] + g.get_edge(v, u) < distance[v])
         {
@@ -43,7 +43,7 @@ class Algorithms
         return false;
     }
 
-    static vector<int> BellmanFord(Graph g, int start, int end)
+    static vector<int> BellmanFord(Graph g, size_t start, size_t end)
     {
         vector<int> dist(g.size(), numeric_limits<int>::max()); // Initialize all distances to infinity.
         dist[start] = 0;                      // The distance from the start node to itself is 0.
@@ -77,7 +77,7 @@ class Algorithms
         return dist;
     }
 
-    static bool DFS(Graph g, int v, vector<bool> &visited, vector<bool> &inStack)
+    static bool DFS(Graph g, size_t v, vector<bool> &visited, vector<bool> &inStack)
     {
         visited[v] = true;
         inStack[v] = true;
@@ -115,7 +115,7 @@ class Algorithms
             return true;                            // The graph is connected if all nodes are visited
         }
 
-        static string shortestPath(Graph g, int start, int end)
+        static string shortestPath(Graph g, size_t start, size_t end)
         {
             if (start == end) 
                 return to_string(start); // If the start and end nodes are the same, the path is 0.
@@ -124,7 +124,7 @@ class Algorithms
             vector<int> dist = BellmanFord(g, start, end); // Run Bellman-Ford algorithm to find the shortest path.
             if (dist.empty()) return "-1";           // If the graph contains a negative weight cycle, return -1.
             string path = to_string(end);            // Start building the path from the end node.
-            int current = end;
+            size_t current = end;
             while (current != start)                // Traverse the path from the end to the start (by ancestors).
             {
                 for (size_t i = 0; i < g.size(); i++)   

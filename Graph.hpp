@@ -10,9 +10,9 @@ namespace ariel
         Graph();
         void loadGraph(vector<vector<int>> graph);
         void printGraph();
-        int size();
-        int get_edge(int i, int j);
-        vector<int> at(int i);
+        size_t size();
+        int get_edge(size_t i, size_t j);
+        vector<int> at(size_t i);
     };
 };
 

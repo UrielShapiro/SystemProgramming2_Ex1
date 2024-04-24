@@ -1,6 +1,3 @@
-//ID: 314779745
-//Mail: uriel1999@gmail.com
-
 #include <iostream>
 #include <vector>
 using namespace std;
@@ -47,15 +44,15 @@ class Graph {
             cout << "Graph with " << this->graph.size() << " vertices and " << edges << " edges." << endl;  
         }
 
-        int size()
+        size_t size()
         {
-            return this->graph.size();
+            return (size_t)this->graph.size();
         }
-        int get_edge(int i, int j)
+        int get_edge(size_t i, size_t j)
         {
             return this->graph.at(i).at(j);
         }
-        vector<int> at(int i)
+        vector<int> at(size_t i)
         {
             return this->graph.at(i);
         }
