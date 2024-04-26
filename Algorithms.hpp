@@ -1,4 +1,5 @@
 #include <string>
+#include "Graph.hpp"
 namespace ariel
 {
     class Algorithms
@@ -8,5 +9,6 @@ namespace ariel
         static string shortestPath(Graph g, size_t start, size_t end);
         static int isContainsCycle(Graph g);
         static string isBipartite(Graph g);
+        bool negativeCycle(Graph g);
     };
 };

@@ -15,4 +15,3 @@ namespace ariel
         vector<int> at(size_t i);
     };
 };
-

@@ -21,6 +21,10 @@ class Graph {
             {
                 for (size_t j = 0; j < graph.size(); j++)
                 {
+                    if(1 == j && graph.at(i).at(j) != 0)
+                    {
+                        throw invalid_argument("Invalid graph: The distance from a vertex to itself must be 0.");
+                    }
                     this->graph.at(i).push_back(graph.at(i).at(j));
                 }
             } 
