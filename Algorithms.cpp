@@ -5,13 +5,13 @@
 #include <limits>
 #include <iostream>
 #include <algorithm>
+#include "Algorithms.hpp"
 using namespace std;
 using ariel::Graph;
 
-class Algorithms
+namespace ariel
 {
-private:
-    //     static void BFS(Graph graph, int startNode, vector<bool> &visited) // Simple implementation of BFS algorithm to find if a graph is connected.
+    //     void Algorithms::BFS(Graph graph, int startNode, vector<bool> &visited) // Simple implementation of BFS algorithm to find if a graph is connected.
     //     {
     //     queue<int> Q;
     //     Q.push(startNode);
@@ -32,7 +32,7 @@ private:
     //     }
     // }
 
-    static bool relax(Graph g, size_t v, size_t u, vector<int> &distance)
+    bool Algorithms::relax(Graph g, size_t v, size_t u, vector<int> &distance)
     {
         if (distance[u] + g.get_edge(v, u) < distance[v])
         {
@@ -42,7 +42,7 @@ private:
         return false;
     }
 
-    static vector<int> BellmanFord(Graph g, size_t start, size_t end)
+    vector<int> Algorithms::BellmanFord(Graph g, size_t start, size_t end)
     {
         vector<int> dist(g.size(), numeric_limits<int>::max()); // Initialize all distances to infinity.
         dist[start] = 0;                                        // The distance from the start node to itself is 0.
@@ -76,7 +76,7 @@ private:
         return dist;
     }
 
-    static bool DFS(Graph g, size_t v, vector<bool> &visited, vector<bool> &inStack)
+    bool Algorithms::DFS(Graph g, size_t v, vector<bool> &visited, vector<bool> &inStack)
     {
         visited[v] = true;
         inStack[v] = true;
@@ -98,7 +98,6 @@ private:
         inStack[v] = false;
         return false;
     }
-
     enum Color
     {
         UNCOLORED,
@@ -110,7 +109,7 @@ private:
      * This function colors the graph nodes with two colors (Red and Blue) in a way that no two
      * adjacent nodes have the same color.
      */
-    static bool colorGraph(Graph g, size_t v, vector<Color> &colors)
+    bool Algorithms::colorGraph(Graph g, size_t v, vector<Color> &colors)
     {
         for (size_t i = 0; i < g.size(); i++)
         {
@@ -133,12 +132,11 @@ private:
         return true;
     }
 
-public:
-    static int isConnected(Graph g)
+    int Algorithms::isConnected(Graph g)
     {
         if (g.size() == 0)
         {
-            return false;                      // Empty graph is considered disconnected.
+            return false; // Empty graph is considered disconnected.
         }
         vector<bool> visited(g.size(), false); // Create a visited array for the graph nodes. initialized to false.
         vector<bool> inStack(g.size(), false); // Create a stack array for the graph nodes. initialized to false.
@@ -153,7 +151,7 @@ public:
         return true; // The graph is connected if all nodes are visited
     }
 
-    static string shortestPath(Graph g, size_t start, size_t end)
+    string Algorithms::shortestPath(Graph g, size_t start, size_t end)
     {
         if (start == end)
         {
@@ -161,12 +159,12 @@ public:
         }
         if (!isConnected(g))
         {
-            return "-1";                               // If the graph is not connected, return -1.
+            return "-1"; // If the graph is not connected, return -1.
         }
         vector<int> dist = BellmanFord(g, start, end); // Run Bellman-Ford algorithm to find the shortest path.
         if (dist.empty())
         {
-            return "-1";              // If the graph contains a negative weight cycle, return -1.
+            return "-1"; // If the graph contains a negative weight cycle, return -1.
         }
         string path = to_string(end); // Start building the path from the end node.
         size_t current = end;
@@ -184,8 +182,9 @@ public:
                 }
             }
         }
+        return path;
     }
-    int isContainsCycle(Graph g)
+    int Algorithms::isContainsCycle(Graph g)
     {
         vector<bool> visited(g.size(), false); // Create a visited array for the graph nodes. initialized to false.
         vector<bool> inStack(g.size(), false); // Create a stack array for the graph nodes. initialized to false.
@@ -198,7 +197,7 @@ public:
         }
         return 0; // If no cycle is found, return false.
     }
-    static string isBipartite(Graph g)
+    string Algorithms::isBipartite(Graph g)
     {
         // Create a color array for the graph nodes. initialized all nodes to UNCOLORED.
         vector<Color> colors(g.size(), UNCOLORED);
@@ -231,5 +230,8 @@ public:
         return "The graph is bipartite: " + A + ", " + B;
     }
 
-    static bool negativeCycle(Graph g);
+    bool Algorithms::negativeCycle(Graph g)
+    {
+        return false; // Not implemented yet. TODO: Implement this function.
+    }
 };

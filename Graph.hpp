@@ -1,3 +1,6 @@
+#ifndef GRAPH_HPP
+#define GRAPH_HPP
+
 #include <vector>
 using namespace std;
 namespace ariel
@@ -15,3 +18,4 @@ namespace ariel
         vector<int> at(size_t i);
     };
 };
+#endif

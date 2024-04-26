@@ -1,0 +1,8 @@
+# compiler outputs
+*.o
+*.so
+
+# Executables
+run
+test
+demo
