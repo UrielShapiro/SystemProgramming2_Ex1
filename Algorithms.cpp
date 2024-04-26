@@ -2,7 +2,7 @@
 #include <vector>
 #include <string>
 #include <queue>
-#include <limits>
+#include <climits>
 #include <iostream>
 #include <algorithm>
 #include "Algorithms.hpp"
@@ -42,10 +42,10 @@ namespace ariel
         return false;
     }
 
-    vector<int> Algorithms::BellmanFord(Graph g, size_t start, size_t end)
+    vector<int> Algorithms::BellmanFord(Graph g, size_t src)
     {
-        vector<int> dist(g.size(), numeric_limits<int>::max()); // Initialize all distances to infinity.
-        dist[start] = 0;                                        // The distance from the start node to itself is 0.
+        vector<int> dist(g.size(), INT_MAX); // Initialize all distances to infinity.
+        dist[src] = 0;                     // The distance from the start node to itself is 0.
 
         for (size_t i = 0; i < g.size(); i++)
         {
@@ -67,7 +67,6 @@ namespace ariel
                 {
                     if (relax(g, i, j, dist))
                     {
-                        cout << "Error: Graph contains a negative weight cycle." << endl;
                         return {};
                     }
                 }
@@ -161,7 +160,7 @@ namespace ariel
         {
             return "-1"; // If the graph is not connected, return -1.
         }
-        vector<int> dist = BellmanFord(g, start, end); // Run Bellman-Ford algorithm to find the shortest path.
+        vector<int> dist(BellmanFord(g, start)); // Run Bellman-Ford algorithm to find the shortest path.
         if (dist.empty())
         {
             return "-1"; // If the graph contains a negative weight cycle, return -1.
@@ -178,7 +177,7 @@ namespace ariel
                     path = to_string(i) + "->" + path;
                     current = i;
                     break; // Break the loop to avoid adding the same node multiple times.
-                    // Will run the while loop again with the new current node, untill reaching the starting node.
+                    // Will run the while loop again with the new current node, until reaching the starting node.
                 }
             }
         }
@@ -187,7 +186,7 @@ namespace ariel
     int Algorithms::isContainsCycle(Graph g)
     {
         vector<bool> visited(g.size(), false); // Create a visited array for the graph nodes. initialized to false.
-        vector<bool> inStack(g.size(), false); // Create a stack array for the graph nodes. initialized to false.
+        vector<bool> inStack(g.size(), false); // Create a stack vector for the graph nodes. initialized to false.
         for (size_t i = 0; i < g.size(); i++)
         {
             if (!visited[i] && DFS(g, i, visited, inStack)) // Run DFS on all unvisited nodes.
@@ -222,9 +221,12 @@ namespace ariel
             }
             else
             {
-                B += to_string(i) + ", ";
+                B += ", " + to_string(i) + ", ";
             }
         }
+        // Remove the last comma and space in both strings:
+        A = A.substr(0, A.size() - 2);
+        B = B.substr(0, B.size() - 2);
         A += "}";
         B += "}";
         return "The graph is bipartite: " + A + ", " + B;
@@ -232,6 +234,22 @@ namespace ariel
 
     bool Algorithms::negativeCycle(Graph g)
     {
-        return false; // Not implemented yet. TODO: Implement this function.
+        if(!isContainsCycle(g))
+        {
+            return false;
+        }
+        // If the Bellman-Ford algorithm returns an empty vector, the graph contains a negative cycle.
+        for (size_t i = 1; i < g.size(); i++)
+        {
+            vector<int> HasNegativeCycle(BellmanFord(g, 0));
+            if (HasNegativeCycle.empty())
+            {
+                return true;
+            }
+        }
+        return false;
+        // Bellman-Ford function returns a vector by value and not by reference.
+        // Therefore, we will copy it using the copy constructor of the vector class.
+        // Then check if the copied vector is empty or not.
     }
 };
