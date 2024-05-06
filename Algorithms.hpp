@@ -11,6 +11,11 @@ namespace ariel
         static bool isConnected(Graph g);
         static string shortestPath(Graph g, size_t start, size_t end);
         static bool isContainsCycle(Graph g);
+        /*
+            * A graph is Bipartite if it can be colored using two colors 
+            * such that vertices in a set are colored with the same color.
+            * @return The sets of vertices if the graph is bipartite, "0" otherwise.
+        */
         static string isBipartite(Graph g);
         bool negativeCycle(Graph g);
         // static void BFS(Graph graph, int startNode, vector<bool> &visited);
@@ -42,7 +47,8 @@ namespace ariel
             RED,
             BLUE
         };
-        static bool colorGraph(Graph g, size_t v, vector<Color> &colors);
+        static bool colorGraph(Graph g, size_t current,size_t parent, vector<Color> &colors);
+        static bool BFSColoring(Graph g, size_t start, std::vector<Color> &colors);
     };
 };
 #endif

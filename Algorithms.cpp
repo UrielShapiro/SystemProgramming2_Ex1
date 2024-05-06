@@ -1,7 +1,7 @@
 #include "Graph.hpp"
 #include <vector>
 #include <string>
-// #include <queue>
+#include <queue>
 #include <climits>
 #include <iostream>
 #include <algorithm>
@@ -10,29 +10,34 @@ using ariel::Graph;
 
 #define INFINITY INT_MAX
 // #define DEBUG
+// #define DELETE
 
 namespace ariel
 {
-    //     void Algorithms::BFS(Graph graph, int startNode, vector<bool> &visited) // Simple implementation of BFS algorithm to find if a graph is connected.
-    //     {
-    //     queue<int> Q;
-    //     Q.push(startNode);
-    //     visited[startNode] = true;
+#ifdef DELETE
+    void Algorithms::BFS(Graph graph, int startNode, vector<bool> &visited) // Simple implementation of BFS algorithm to find if a graph is connected.
+    {
+        queue<int> Q;
+        Q.push(startNode);
+        visited[startNode] = true;
 
-    //     while (!Q.empty()) {
-    //         int currentNode = Q.front();
-    //         Q.pop();
+        while (!Q.empty())
+        {
+            int currentNode = Q.front();
+            Q.pop();
 
-    //         // Explore all unvisited neighbors of the current node
-    //         for (int neighbor : graph.at(currentNode)) {
-    //             if (!visited[neighbor] && graph.get_edge(currentNode, neighbor) != 0)
-    //             {
-    //                 visited[neighbor] = true;
-    //                 Q.push(neighbor);
-    //             }
-    //         }
-    //     }
-    // }
+            // Explore all unvisited neighbors of the current node
+            for (int neighbor : graph.at(currentNode))
+            {
+                if (!visited[neighbor] && graph.get_edge(currentNode, neighbor) != 0)
+                {
+                    visited[neighbor] = true;
+                    Q.push(neighbor);
+                }
+            }
+        }
+    }
+#endif
 
     bool Algorithms::relax(Graph g, size_t v, size_t u, std::vector<int> &distance)
     {
@@ -132,26 +137,80 @@ namespace ariel
         BLUE
     };
 
-    /*
-     * This function colors the graph nodes with two colors (Red and Blue) in a way that no two
-     * adjacent nodes have the same color.
-     */
-    bool Algorithms::colorGraph(Graph g, size_t current, std::vector<Color> &colors)
+/*
+ * This function colors the graph nodes with two colors (Red and Blue) in a way that no two
+ * adjacent nodes have the same color.
+ */
+#ifdef DELETE
+    bool Algorithms::colorGraph(Graph g, size_t current, size_t parent, std::vector<Color> &colors)
     {
         for (size_t i = 0; i < g.size(); i++)
         {
+            if (!g.isDirectedGraph() && i == parent || i == current)
+            {
+                continue;
+            }
             if (g.get_edge(current, i) != 0)
             {
+#ifdef DEBUG
+                cout << "Checking edge: " << current << " -> " << i << endl;
+#endif
                 if (colors[i] == UNCOLORED)
                 {
                     colors[i] = colors[current] == RED ? BLUE : RED;
-                    if (!colorGraph(g, i, colors))
+#ifdef DEBUG
+                    cout << "Coloring node: " << i << " with: " << colors[i] << endl;
+#endif
+                    if (!colorGraph(g, i, current, colors))
                     {
+#ifdef DEBUG
+                        cout << "vertex " << i << " failed" << endl;
+#endif
                         return false;
                     }
                 }
                 else if (colors[i] == colors[current])
                 {
+#ifdef DEBUG
+                    cout << "vertex " << i << " color is the same as vertex: " << current << endl;
+#endif
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+#endif
+
+    bool Algorithms::BFSColoring(Graph g, size_t start, std::vector<Color> &colors)
+    {
+        std::queue<size_t> Q;
+        Q.push(start);
+        colors[start] = RED;
+
+        while (!Q.empty())
+        {
+            size_t current = Q.front();
+            Q.pop();
+
+            for (size_t i = 0; i < g.size(); i++)
+            {
+#ifdef DEBUG
+                cout << "Checking edge: " << current << " -> " << i << endl;
+#endif
+                if (g.get_edge(current, i) != 0 && colors[i] == UNCOLORED)
+                {
+                    Q.push(i);
+                    colors[i] = colors[current] == RED ? BLUE : RED;
+#ifdef DEBUG
+                    cout << "Coloring node: " << i << " with: " << colors[i] << endl;
+#endif
+                }
+                if (i != current && g.get_edge(current, i) != 0 && colors[i] == colors[current])
+                {
+#ifdef DEBUG
+                    cout << "vertex " << i << " color is the same as vertex: " << current << endl;
+#endif
                     return false;
                 }
             }
@@ -194,7 +253,7 @@ namespace ariel
         std::vector<bool> inStack(g.size(), false);
         bool doenstMatter = false;
         DFS(g, start, INFINITY, visited, inStack, doenstMatter); // Check if start is connected to end.
-        if(!visited[end])
+        if (!visited[end])
         {
             return "-1"; // If the start node is not connected to the end node, return -1.
         }
@@ -203,7 +262,7 @@ namespace ariel
         bool negative_cycle = BellmanFord(g, start, dist); // Run Bellman-Ford algorithm to find the shortest path.
 
 #ifdef DEBUG
-        for (size_t i = 0; i < dist.size() ; i++)
+        for (size_t i = 0; i < dist.size(); i++)
         {
             cout << "Shotest path for vertex: " << i << " is: " << dist.at(i) << endl;
         }
@@ -218,10 +277,8 @@ namespace ariel
 #endif
         string path = to_string(end); // Start building the path from the end node.
         size_t current = end;
-        size_t runs = 25; // Maximum number of runs to avoid infinite loops.
-        while (current != start && runs > 0) // Build the path from the end node to the start node (backwards
+        while (current != start) // Build the path from the end node to the start node (backwards
         {
-            runs--;
 #ifdef DEBUG
             cout << "Current node: " << current << endl;
             cout << "The path is: " << path << endl;
@@ -282,8 +339,7 @@ namespace ariel
         {
             if (colors[i] == UNCOLORED)
             {
-                colors[i] = RED; // Color the first node in the connection component with RED.
-                if (!colorGraph(g, i, colors))
+                if (!BFSColoring(g, i, colors))
                 {
                     return "0"; // If the graph is not bipartite, return false.
                 }
