@@ -1,13 +1,15 @@
 #include "Graph.hpp"
 #include <vector>
 #include <string>
-#include <queue>
+// #include <queue>
 #include <climits>
 #include <iostream>
 #include <algorithm>
 #include "Algorithms.hpp"
-using namespace std;
 using ariel::Graph;
+
+#define INFINITY INT_MAX
+// #define DEBUG
 
 namespace ariel
 {
@@ -32,7 +34,7 @@ namespace ariel
     //     }
     // }
 
-    bool Algorithms::relax(Graph g, size_t v, size_t u, vector<int> &distance)
+    bool Algorithms::relax(Graph g, size_t v, size_t u, std::vector<int> &distance)
     {
         if (distance[u] + g.get_edge(v, u) < distance[v])
         {
@@ -42,10 +44,14 @@ namespace ariel
         return false;
     }
 
-    vector<int> Algorithms::BellmanFord(Graph g, size_t src)
+    std::vector<int> Algorithms::BellmanFord(Graph g, size_t src)
     {
-        vector<int> dist(g.size(), INT_MAX); // Initialize all distances to infinity.
-        dist[src] = 0;                     // The distance from the start node to itself is 0.
+#ifdef DEBUG
+        return {};
+#endif
+
+        std::vector<int> dist(g.size(), INFINITY); // Initialize all distances to infinity.
+        dist[src] = 0;                             // The distance from the start node to itself is 0.
 
         for (size_t i = 0; i < g.size(); i++)
         {
@@ -75,28 +81,45 @@ namespace ariel
         return dist;
     }
 
-    bool Algorithms::DFS(Graph g, size_t v, vector<bool> &visited, vector<bool> &inStack)
+    void Algorithms::DFS(Graph g, size_t current, size_t parent, std::vector<bool> &visited,
+                         std::vector<bool> &inStack, bool &cycle)
     {
-        visited[v] = true;
-        inStack[v] = true;
+        visited[current] = true;
+        inStack[current] = true;
 
-        for (size_t i = 0; i < g.size(); i++)
+        for (size_t neighbor = 0; neighbor < g.at(current).size(); neighbor++)
         {
-            if (g.get_edge(v, i) != 0)
+            if (!g.isDirectedGraph() && neighbor == parent) // Skip the parent node in undirected graphs.
             {
-                if (!visited[i] && DFS(g, i, visited, inStack))
-                {
-                    return true;
-                }
-                else if (inStack[i])
-                {
-                    return true;
-                }
+#ifdef DEBUG
+                cout << "The graph is directed: " << g.isDirectedGraph() << endl;
+                cout << "The neighbor is the parent: " << neighbor << " == " << parent << endl;
+#endif
+                continue;
+            }
+            if (neighbor == current)
+            {
+                continue;
+            }
+            if (inStack[neighbor] && g.get_edge(neighbor, current) != 0)
+            {
+#ifdef DEBUG
+                cout << "The cycle is: " << current << "->" << neighbor << endl;
+#endif
+                cycle = true;
+            }
+            if (!visited[neighbor] && g.get_edge(neighbor, current) != 0)
+            {
+#ifdef DEBUG
+                cout << "Running DFS from " << neighbor << ". His parent is: " << current << endl;
+#endif
+
+                DFS(g, neighbor, current, visited, inStack, cycle);
             }
         }
-        inStack[v] = false;
-        return false;
+        inStack[current] = false;
     }
+
     enum Color
     {
         UNCOLORED,
@@ -108,21 +131,21 @@ namespace ariel
      * This function colors the graph nodes with two colors (Red and Blue) in a way that no two
      * adjacent nodes have the same color.
      */
-    bool Algorithms::colorGraph(Graph g, size_t v, vector<Color> &colors)
+    bool Algorithms::colorGraph(Graph g, size_t current, std::vector<Color> &colors)
     {
         for (size_t i = 0; i < g.size(); i++)
         {
-            if (g.get_edge(v, i) != 0)
+            if (g.get_edge(current, i) != 0)
             {
                 if (colors[i] == UNCOLORED)
                 {
-                    colors[i] = colors[v] == RED ? BLUE : RED;
+                    colors[i] = colors[current] == RED ? BLUE : RED;
                     if (!colorGraph(g, i, colors))
                     {
                         return false;
                     }
                 }
-                else if (colors[i] == colors[v])
+                else if (colors[i] == colors[current])
                 {
                     return false;
                 }
@@ -131,16 +154,21 @@ namespace ariel
         return true;
     }
 
-    int Algorithms::isConnected(Graph g)
+    bool Algorithms::isConnected(Graph g)
     {
         if (g.size() == 0)
         {
-            return false; // Empty graph is considered disconnected.
+#ifdef DEBUG
+            cout << "Empty graph is considered not connected" << endl;
+#endif
+            return false;
         }
-        vector<bool> visited(g.size(), false); // Create a visited array for the graph nodes. initialized to false.
-        vector<bool> inStack(g.size(), false); // Create a stack array for the graph nodes. initialized to false.
 
-        DFS(g, 0, visited, inStack); // Perform BFS starting from the first node.
+        std::vector<bool> visited(g.size(), false); // Create a visited array for the graph nodes. initialized to false.
+        std::vector<bool> inStack(g.size(), false); // Create a stack array for the graph nodes. initialized to false.
+
+        bool doenstMatter = false;                           // This variable will have the a boolean value that we don't care about (if the graph has a cycle).
+        DFS(g, 0, INFINITY, visited, inStack, doenstMatter); // Perform DFS starting from the first node.
 
         auto iter = find(visited.begin(), visited.end(), false);
         if (iter != visited.end()) // The iterator found a false value in the visited array.
@@ -154,13 +182,18 @@ namespace ariel
     {
         if (start == end)
         {
-            return to_string(start); // If the start and end nodes are the same, the path is 0.
+            return "0"; // If the start and end nodes are the same, the path is 0.
         }
-        if (!isConnected(g))
+
+        std::vector<int> dist = BellmanFord(g, start); // Run Bellman-Ford algorithm to find the shortest path.
+
+#ifdef DEBUG
+        for (int i : dist)
         {
-            return "-1"; // If the graph is not connected, return -1.
+            cout << "Shotest path dist: " << i << " " << endl;
         }
-        vector<int> dist(BellmanFord(g, start)); // Run Bellman-Ford algorithm to find the shortest path.
+#endif
+
         if (dist.empty())
         {
             return "-1"; // If the graph contains a negative weight cycle, return -1.
@@ -171,11 +204,15 @@ namespace ariel
         {
             for (size_t i = 0; i < g.size(); i++)
             {
-                // Check if the current node is reachable and if we reached its ancestor in the shortest path.
+                // cout << dist[i] + g.get_edge(i, current) << " == " << dist[current] << endl;
+                //  Check if the current node is reachable and if we reached its ancestor in the shortest path.
                 if (g.get_edge(i, current) != 0 && dist[i] + g.get_edge(i, current) == dist[current])
                 {
                     path = to_string(i) + "->" + path;
                     current = i;
+#ifdef DEBUG
+                    cout << "Stuck here." << endl;
+#endif
                     break; // Break the loop to avoid adding the same node multiple times.
                     // Will run the while loop again with the new current node, until reaching the starting node.
                 }
@@ -183,28 +220,31 @@ namespace ariel
         }
         return path;
     }
-    int Algorithms::isContainsCycle(Graph g)
+
+    bool Algorithms::isContainsCycle(Graph g)
     {
-        vector<bool> visited(g.size(), false); // Create a visited array for the graph nodes. initialized to false.
-        vector<bool> inStack(g.size(), false); // Create a stack vector for the graph nodes. initialized to false.
+        std::vector<bool> visited(g.size(), false); // Create a visited array for the graph nodes. initialized to false.
+        std::vector<bool> inStack(g.size(), false); // Create a stack vector for the graph nodes. initialized to false.
+        bool cycle = false;
         for (size_t i = 0; i < g.size(); i++)
         {
-            if (!visited[i] && DFS(g, i, visited, inStack)) // Run DFS on all unvisited nodes.
-            {
-                return 1; // If a cycle is found, return true.
-            }
+            if (visited[i])
+                continue;
+
+            DFS(g, i, INFINITY, visited, inStack, cycle);
         }
-        return 0; // If no cycle is found, return false.
+        return cycle;
     }
+
     string Algorithms::isBipartite(Graph g)
     {
         // Create a color array for the graph nodes. initialized all nodes to UNCOLORED.
-        vector<Color> colors(g.size(), UNCOLORED);
+        std::vector<Color> colors(g.size(), UNCOLORED);
         for (size_t i = 0; i < g.size(); i++)
         {
             if (colors[i] == UNCOLORED)
             {
-                colors[i] = RED; // Color the first node with RED.
+                colors[i] = RED; // Color the first node in the connection component with RED.
                 if (!colorGraph(g, i, colors))
                 {
                     return "0"; // If the graph is not bipartite, return false.
@@ -221,7 +261,7 @@ namespace ariel
             }
             else
             {
-                B += ", " + to_string(i) + ", ";
+                B += to_string(i) + ", ";
             }
         }
         // Remove the last comma and space in both strings:
@@ -234,14 +274,14 @@ namespace ariel
 
     bool Algorithms::negativeCycle(Graph g)
     {
-        if(!isContainsCycle(g))
+        if (!isContainsCycle(g))
         {
             return false;
         }
         // If the Bellman-Ford algorithm returns an empty vector, the graph contains a negative cycle.
         for (size_t i = 1; i < g.size(); i++)
         {
-            vector<int> HasNegativeCycle(BellmanFord(g, 0));
+            std::vector<int> HasNegativeCycle(BellmanFord(g, 0));
             if (HasNegativeCycle.empty())
             {
                 return true;
