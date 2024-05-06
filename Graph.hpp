@@ -9,6 +9,7 @@ namespace ariel
     {
     private:
         vector<vector<int>> graph;
+        bool isDirected;
     public:
         Graph();
         void loadGraph(vector<vector<int>> graph);
@@ -16,6 +17,7 @@ namespace ariel
         size_t size();
         int get_edge(size_t i, size_t j);
         vector<int> at(size_t i);
+        bool isDirectedGraph();
     };
 };
 #endif
