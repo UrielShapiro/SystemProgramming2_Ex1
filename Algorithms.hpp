@@ -8,9 +8,9 @@ namespace ariel
     class Algorithms
     {
     public:
-        static int isConnected(Graph g);
+        static bool isConnected(Graph g);
         static string shortestPath(Graph g, size_t start, size_t end);
-        static int isContainsCycle(Graph g);
+        static bool isContainsCycle(Graph g);
         static string isBipartite(Graph g);
         bool negativeCycle(Graph g);
         // static void BFS(Graph graph, int startNode, vector<bool> &visited);
@@ -35,7 +35,7 @@ namespace ariel
          * @param src  the source node.
          */
         static vector<int> BellmanFord(Graph g, size_t src);
-        static bool DFS(Graph g, size_t v, vector<bool> &visited, vector<bool> &inStack);
+        static void DFS(Graph g, size_t current, size_t parent, std::vector<bool> &visited, std::vector<bool> &inStack, bool &cycle);
         enum Color
         {
             UNCOLORED,
