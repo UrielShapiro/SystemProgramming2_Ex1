@@ -36,30 +36,32 @@ namespace ariel
 
     bool Algorithms::relax(Graph g, size_t v, size_t u, std::vector<int> &distance)
     {
-        if (distance[u] + g.get_edge(v, u) < distance[v])
+        if (distance[u] + g.get_edge(u, v) < distance[v])
         {
             distance[v] = distance[u] + g.get_edge(v, u);
+#ifdef DEBUG
+            cout << "Relaxing edge: " << u << " -> " << v << endl;
+            cout << "The distance from " << u << " to " << v << " is: " << distance[v] << endl;
+#endif
             return true;
         }
         return false;
     }
 
-    std::vector<int> Algorithms::BellmanFord(Graph g, size_t src)
+    bool Algorithms::BellmanFord(Graph g, size_t src, std::vector<int> &dist)
     {
-#ifdef DEBUG
-        return {};
-#endif
+        dist[src] = 0; // The distance from the start node to itself is 0.
 
-        std::vector<int> dist(g.size(), INFINITY); // Initialize all distances to infinity.
-        dist[src] = 0;                             // The distance from the start node to itself is 0.
-
-        for (size_t i = 0; i < g.size(); i++)
+        for (size_t times = 0; times < g.size() - 1; times++)
         {
-            for (size_t j = 0; i < g.size(); i++)
+            for (size_t i = 0; i < g.size(); i++)
             {
-                if (g.get_edge(i, j) != 0)
+                for (size_t j = 0; j < g.size(); j++)
                 {
-                    relax(g, i, j, dist);
+                    if (g.get_edge(i, j) != 0)
+                    {
+                        relax(g, j, i, dist);
+                    }
                 }
             }
         }
@@ -73,12 +75,15 @@ namespace ariel
                 {
                     if (relax(g, i, j, dist))
                     {
-                        return {};
+#ifdef DEBUG
+                        cout << "Negative cycle found" << endl;
+#endif
+                        return true; // The graph contains a negative cycle.
                     }
                 }
             }
         }
-        return dist;
+        return false;
     }
 
     void Algorithms::DFS(Graph g, size_t current, size_t parent, std::vector<bool> &visited,
@@ -185,39 +190,72 @@ namespace ariel
             return "0"; // If the start and end nodes are the same, the path is 0.
         }
 
-        std::vector<int> dist = BellmanFord(g, start); // Run Bellman-Ford algorithm to find the shortest path.
+        std::vector<bool> visited(g.size(), false);
+        std::vector<bool> inStack(g.size(), false);
+        bool doenstMatter = false;
+        DFS(g, start, INFINITY, visited, inStack, doenstMatter); // Check if start is connected to end.
+        if(!visited[end])
+        {
+            return "-1"; // If the start node is not connected to the end node, return -1.
+        }
+
+        std::vector<int> dist(g.size(), INFINITY);         // Initialize all distances to infinity.
+        bool negative_cycle = BellmanFord(g, start, dist); // Run Bellman-Ford algorithm to find the shortest path.
 
 #ifdef DEBUG
-        for (int i : dist)
+        for (size_t i = 0; i < dist.size() ; i++)
         {
-            cout << "Shotest path dist: " << i << " " << endl;
+            cout << "Shotest path for vertex: " << i << " is: " << dist.at(i) << endl;
         }
 #endif
 
-        if (dist.empty())
+        if (negative_cycle)
         {
             return "-1"; // If the graph contains a negative weight cycle, return -1.
         }
+#ifdef DEBUG
+        cout << "There is no negative cycle" << endl;
+#endif
         string path = to_string(end); // Start building the path from the end node.
         size_t current = end;
-        while (current != start) // Traverse the path from the end to the start (by ancestors).
+        size_t runs = 25; // Maximum number of runs to avoid infinite loops.
+        while (current != start && runs > 0) // Build the path from the end node to the start node (backwards
         {
-            for (size_t i = 0; i < g.size(); i++)
+            runs--;
+#ifdef DEBUG
+            cout << "Current node: " << current << endl;
+            cout << "The path is: " << path << endl;
+#endif
+            bool breakLoop = false;
+            for (size_t i = 0; i < g.size() && !breakLoop; i++)
             {
-                // cout << dist[i] + g.get_edge(i, current) << " == " << dist[current] << endl;
+#ifdef DEBUG
+                cout << "Checking node: " << i << endl;
+#endif
                 //  Check if the current node is reachable and if we reached its ancestor in the shortest path.
                 if (g.get_edge(i, current) != 0 && dist[i] + g.get_edge(i, current) == dist[current])
                 {
                     path = to_string(i) + "->" + path;
                     current = i;
+                    breakLoop = true;
 #ifdef DEBUG
-                    cout << "Stuck here." << endl;
+                    cout << "Entered the if statement" << endl;
 #endif
                     break; // Break the loop to avoid adding the same node multiple times.
                     // Will run the while loop again with the new current node, until reaching the starting node.
                 }
+                if (g.get_edge(i, current) != 0)
+                {
+#ifdef DEBUG
+                    cout << "The edge from " << i << " to " << current << " is: " << g.get_edge(i, current) << endl;
+                    cout << "The distance from " << i << " to " << current << " is: " << dist[i] << endl;
+                    cout << "The distance from " << i << " to " << current << " + the edge is: " << dist[i] + g.get_edge(i, current) << endl;
+                    cout << "The distance from " << start << " to " << current << " is: " << dist[current] << endl;
+#endif
+                }
             }
         }
+
         return path;
     }
 
@@ -279,15 +317,10 @@ namespace ariel
             return false;
         }
         // If the Bellman-Ford algorithm returns an empty vector, the graph contains a negative cycle.
-        for (size_t i = 1; i < g.size(); i++)
-        {
-            std::vector<int> HasNegativeCycle(BellmanFord(g, 0));
-            if (HasNegativeCycle.empty())
-            {
-                return true;
-            }
-        }
-        return false;
+
+        std::vector<int> distance(g.size(), INFINITY);
+        bool negative_cycle = BellmanFord(g, 0, distance);
+        return negative_cycle;
         // Bellman-Ford function returns a vector by value and not by reference.
         // Therefore, we will copy it using the copy constructor of the vector class.
         // Then check if the copied vector is empty or not.

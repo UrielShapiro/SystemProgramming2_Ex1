@@ -34,7 +34,7 @@ namespace ariel
          * @param g  the graph.
          * @param src  the source node.
          */
-        static vector<int> BellmanFord(Graph g, size_t src);
+        static bool BellmanFord(Graph g, size_t src, vector<int> &dist);
         static void DFS(Graph g, size_t current, size_t parent, std::vector<bool> &visited, std::vector<bool> &inStack, bool &cycle);
         enum Color
         {
