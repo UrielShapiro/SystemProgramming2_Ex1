@@ -10,7 +10,7 @@ namespace ariel
     public:
         static bool isConnected(Graph g);
         static string shortestPath(Graph g, size_t start, size_t end);
-        static bool isContainsCycle(Graph g);
+        static string isContainsCycle(Graph g);
         /*
             * A graph is Bipartite if it can be colored using two colors 
             * such that vertices in a set are colored with the same color.
@@ -40,14 +40,16 @@ namespace ariel
          * @param src  the source node.
          */
         static bool BellmanFord(Graph g, size_t src, vector<int> &dist);
-        static void DFS(Graph g, size_t current, size_t parent, std::vector<bool> &visited, std::vector<bool> &inStack, bool &cycle);
+        static void DFS(Graph g, size_t current, size_t parent, std::vector<bool> &visited, std::vector<bool> &inStack);
         enum Color
         {
             UNCOLORED,
             RED,
             BLUE
         };
+        #ifdef DELETE
         static bool colorGraph(Graph g, size_t current,size_t parent, vector<Color> &colors);
+        #endif
         static bool BFSColoring(Graph g, size_t start, std::vector<Color> &colors);
     };
 };

@@ -10,7 +10,7 @@ using ariel::Graph;
 
 #define INFINITY INT_MAX
 // #define DEBUG
-// #define DELETE
+//   #define DELETE
 
 namespace ariel
 {
@@ -92,7 +92,7 @@ namespace ariel
     }
 
     void Algorithms::DFS(Graph g, size_t current, size_t parent, std::vector<bool> &visited,
-                         std::vector<bool> &inStack, bool &cycle)
+                         std::vector<bool> &inStack)
     {
         visited[current] = true;
         inStack[current] = true;
@@ -116,7 +116,6 @@ namespace ariel
 #ifdef DEBUG
                 cout << "The cycle is: " << current << "->" << neighbor << endl;
 #endif
-                cycle = true;
             }
             if (!visited[neighbor] && g.get_edge(neighbor, current) != 0)
             {
@@ -124,10 +123,71 @@ namespace ariel
                 cout << "Running DFS from " << neighbor << ". His parent is: " << current << endl;
 #endif
 
-                DFS(g, neighbor, current, visited, inStack, cycle);
+                DFS(g, neighbor, current, visited, inStack);
             }
         }
         inStack[current] = false;
+    }
+
+    enum Visited
+    {
+        WHITE,
+        GREY,
+        BLACK
+    };
+
+    size_t DFSCycleCheck(Graph g, size_t current, size_t parent, std::vector<Visited> &visited,
+                         std::vector<size_t> &parents, std::vector<size_t> &cycleNodes)
+    {
+
+#ifdef DEBUG
+        cout << "Running DFSCycleCheck with: " << current << endl;
+#endif
+        visited[current] = GREY;
+        parents[current] = parent;
+        cycleNodes.push_back(current);
+#ifdef DEBUG
+        if (visited[current] == GREY)
+            cout << "Grey" << endl;
+#endif
+        for (size_t neighbor = 0; neighbor < g.at(current).size(); neighbor++)
+        {
+            if (!g.isDirectedGraph() && neighbor == parent) // Skip the parent node in undirected graphs.
+            {
+                continue;
+            }
+            if (visited[neighbor] == GREY && g.get_edge(neighbor, current) != 0)
+            {
+#ifdef DEBUG
+                cout << "The cycle is: " << current << "->" << neighbor << endl;
+#endif
+                parents[neighbor] = current;
+#ifdef DEBUG
+                cout << "The parent of " << neighbor << " is: " << parents[neighbor] << endl;
+#endif
+                cycleNodes.push_back(neighbor);
+                return current;
+            }
+            else if (visited[neighbor] == WHITE && g.get_edge(neighbor, current) != 0)
+            {
+#ifdef DEBUG
+                cout << "Running DFS from " << neighbor << ". His parent is: " << current << endl;
+#endif
+                parents[neighbor] = current;
+
+#ifdef DEBUG
+                cout << "The parent of " << neighbor << " is: " << parents[neighbor] << endl;
+#endif
+
+                if (DFSCycleCheck(g, neighbor, current, visited, parents, cycleNodes) != INFINITY)
+                {
+                    return current;
+                }
+            }
+        }
+        visited[current] = BLACK;
+        cycleNodes.pop_back();
+        return INFINITY;
     }
 
     enum Color
@@ -228,11 +288,9 @@ namespace ariel
             return false;
         }
 
-        std::vector<bool> visited(g.size(), false); // Create a visited array for the graph nodes. initialized to false.
-        std::vector<bool> inStack(g.size(), false); // Create a stack array for the graph nodes. initialized to false.
-
-        bool doenstMatter = false;                           // This variable will have the a boolean value that we don't care about (if the graph has a cycle).
-        DFS(g, 0, INFINITY, visited, inStack, doenstMatter); // Perform DFS starting from the first node.
+        std::vector<bool> visited(g.size(), false);          // Create a visited array for the graph nodes. initialized to false.
+        std::vector<bool> inStack(g.size(), false);          // Create a stack array for the graph nodes. initialized to false.
+        DFS(g, 0, INFINITY, visited, inStack); // Perform DFS starting from the first node.
 
         auto iter = find(visited.begin(), visited.end(), false);
         if (iter != visited.end()) // The iterator found a false value in the visited array.
@@ -251,8 +309,7 @@ namespace ariel
 
         std::vector<bool> visited(g.size(), false);
         std::vector<bool> inStack(g.size(), false);
-        bool doenstMatter = false;
-        DFS(g, start, INFINITY, visited, inStack, doenstMatter); // Check if start is connected to end.
+        DFS(g, start, INFINITY, visited, inStack); // Check if start is connected to end.
         if (!visited[end])
         {
             return "-1"; // If the start node is not connected to the end node, return -1.
@@ -316,19 +373,99 @@ namespace ariel
         return path;
     }
 
-    bool Algorithms::isContainsCycle(Graph g)
+    string printPath(size_t src, size_t parent, std::vector<size_t> parents)
     {
-        std::vector<bool> visited(g.size(), false); // Create a visited array for the graph nodes. initialized to false.
-        std::vector<bool> inStack(g.size(), false); // Create a stack vector for the graph nodes. initialized to false.
-        bool cycle = false;
-        for (size_t i = 0; i < g.size(); i++)
+        if (parent == src)
         {
-            if (visited[i])
-                continue;
-
-            DFS(g, i, INFINITY, visited, inStack, cycle);
+            return to_string(src);
         }
-        return cycle;
+        else if (parent == INFINITY)
+        {
+            return "No path";
+        }
+        return printPath(src, parents[parent], parents) + "->" + to_string(parent);
+    }
+
+    string Algorithms::isContainsCycle(Graph g)
+    {
+        std::vector<Visited> visited(g.size(), WHITE);   // Create a visited array for the graph nodes. initialized to false.
+        std::vector<size_t> parents(g.size(), INFINITY); // Create a stack vector for the graph nodes. initialized to false.
+        size_t cycle_node;
+        for (size_t i = 0; auto iter = find(visited.begin(), visited.end(), WHITE) != visited.end(); i++)
+        {
+            if (visited[i] != WHITE)
+            {
+#ifdef DEBUG
+                cout << "The node is already visited: " << i << endl;
+#endif
+                continue;
+            }
+
+#ifdef DEBUG
+            cout << "Running DFS from: " << i << endl;
+            for (Visited v : visited)
+            {
+                if (v == WHITE)
+                {
+                    cout << "White ";
+                }
+                else if (v == GREY)
+                {
+                    cout << "Grey ";
+                }
+                else
+                {
+                    cout << "Black ";
+                }
+            }
+            cout << endl;
+#endif
+            std::vector<size_t> cycleNodes;
+            cycle_node = DFSCycleCheck(g, i, INFINITY, visited, parents, cycleNodes);
+#ifdef DEBUG
+            cout << "The cycle node is: " << cycle_node << endl;
+            cout << endl;
+            cout << "The cycle nodes are: ";
+            for (auto a : cycleNodes)
+            {
+                cout << a << " ";
+            }
+            cout << endl;
+#endif
+            if (cycle_node != INFINITY)
+            {
+#ifdef DEBUG
+                for (auto a : parents)
+                {
+                    cout << a << " ";
+                }
+                cout << endl;
+#endif
+                string path = "The cycle is: ";
+                //                 size_t current = parents[cycle_node];
+                //                 while (current != cycle_node && current < parents.size())
+                //                 {
+                // #ifdef DEBUG
+                //                     cout << "The current node is: " << current << endl;
+                //                     cout << "The parent of the current node is: " << parents[current] << endl;
+                //                     cout << "Graph size: " << g.size() << endl;
+                // #endif
+                //                     path += to_string(current) + "->";
+                //                     current = parents[current];
+                // #ifdef DEBUG
+                //                     cout << "The path is: " << path << endl;
+                //                     cout << "The current node is: " << current << endl;
+                // #endif
+                //                 }
+                path += printPath(cycle_node, parents[cycle_node], parents);
+                path += "->" + to_string(cycle_node);
+#ifdef DEBUG
+                cout << path << endl;
+#endif
+                return path;
+            }
+        }
+        return "0"; // If the graph does not contain a cycle, return false.
     }
 
     string Algorithms::isBipartite(Graph g)
@@ -368,15 +505,15 @@ namespace ariel
 
     bool Algorithms::negativeCycle(Graph g)
     {
-        if (!isContainsCycle(g))
+        // TODO: ADD AN OPTION TO RETURN THE CYCLE
+        if (isContainsCycle(g) == "0")
         {
             return false;
         }
         // If the Bellman-Ford algorithm returns an empty vector, the graph contains a negative cycle.
 
         std::vector<int> distance(g.size(), INFINITY);
-        bool negative_cycle = BellmanFord(g, 0, distance);
-        return negative_cycle;
+        return BellmanFord(g, 0, distance);
         // Bellman-Ford function returns a vector by value and not by reference.
         // Therefore, we will copy it using the copy constructor of the vector class.
         // Then check if the copied vector is empty or not.
