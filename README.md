@@ -1,29 +1,132 @@
-# מטלה 1 - גרפים (Classes and Namespaces)
+# Makefile Documentation
 
-המטרה שלכם במטלה הזאת היא ליצור מחלקה שמייצגת גרף ולממש אלגוריתמים על הגרפים (זה הזמן להזכר בקורס אלגוריתמים 1).
+## Targets
 
-במטלה הזאת הייצוג של הגרף שלכם יתבצע בעזרת מטריצת שכנויות - https://he.wikipedia.org/wiki/%D7%9E%D7%98%D7%A8%D7%99%D7%A6%D7%AA_%D7%A9%D7%9B%D7%A0%D7%95%D7%AA.
+### `all`
 
-הגרף יכול להיות גרף מכוון ולא מכוון וגם גרף ממושקל. מטריצת השכנויות חייבת להיות מטריצה ריבועית.
+- Compiles the `demo` and `test` targets, which are the primary executables for running the program and tests.
 
-עליכם לכתוב את הקבצים הבאים:
+### `debug`
 
-```
-Graph.cpp
-Algorithms.cpp
-```
+- Compiles `Algorithms.cpp` with debugging symbols (Changes #define DEBUG to be defined) and runs the `test` target.
 
-הקובץ `Graph.cpp` מכיל מחלקה המייצגת גרף.
-המחלקה מכילה את הפעולות `loadGraph` המקבלת מטריצת שכנויות וטוענת אותה לתוך הגרף ו-`printGraph` שמדפיסה את הייצוג של הגרף (הפורמט לבחירתכם, ראו דוגמה ב-`Demo.cpp`).
+### `run`
 
-הקובץ `Algorithms.cpp` מכיל מימושים לאלגוריתמים על גרפים. ביניהם:
+- Executes the `demo` target, which is the main program.
 
-- `isConnected(g)` - האלגוריתם מקבל גרף ומחזיר 1 אם הגרף קשיר (אחרת מחזיר 0).
-- `shortestPath(g,start,end)` - האלגוריתם מקבל גרף, קודקוד התחלה וקודקוד סיום ומחזיר את המסלול הקל ביותר (במקרה שהגרף לא ממושקל - הקצר ביותר) בין שני הקודקודים. במידה ואין מסלול כזה, האלגוריתם יחזיר -1.
-- `isContainsCycle(g)` - האלגוריתם מקבל גרף ומדפיס מעגל כלשהו. אם לא קיים מעגל בגרף, האלגוריתם יחזיר 0.
-- `isBipartite(g)` - האלגוריתם מקבל גרף ומחזיר את החלוקה של הגרף לגרף דו-צדדי. אם אי אפשר לחלק את הגרף, האלגוריתם יחזיר 0.
-- `negativeCycle(g)` - האלגוריתם מקבל גרף ומוצא מעגל שלילי (כלומר מעגל שסכום המשקלים של הצלעות שלילי). אם לא קיים מעגל כזה, האלגוריתם ידפיס שלא קיים מעגל שלילי.
+### `test`
 
-הקובץ `Demo.cpp` מכיל דוגמאות של קלטים ופלטים.
-עליכם לכתוב בתחילת כל קובץ את מספר תעודת הזהות שלכם ואת המייל. כמו כן, בנוסף לקבצים של המטלה אתם נדרשים להגיש גם קובץ README המתאר את אופן המימוש ואת החלוקה שביצעתם בקוד (סוג של מדריך משתמש). אי עמידה בהנחיות תגרור הפחתה בציון. בהצלחה!
-  
+- Compiles the `TestCounter.o`, `Test.o`, and other object files into the `test` executable and runs it.
+
+### `tidy`
+
+- Runs `clang-tidy` on the source files with a set of predefined checks for bugs, performance, portability, and readability. It treats warnings as errors except for those explicitly allowed.
+
+### `valgrind`
+
+- Runs Valgrind on both the `demo` and `test` executables to detect memory leaks and other memory-related issues.
+
+### `clean`
+
+- Removes all generated object files and executables, cleaning up the build directory.
+
+## Usage
+
+To compile and run the program, simply execute `make` in the terminal. To run the tests, execute `make test`. For debugging, use `make debug`. To clean up the build artifacts, use `make clean`.
+
+
+# Ariel Graph Library
+
+This library provides a simple and intuitive interface for working with graphs that are represented as adjecency matrix. It supports both directed and undirected graphs, and allows for the manipulation and analysis of these structures. Below is a detailed explanation of the provided code.
+
+## Overview
+
+The library defines a `Graph` class within the `ariel` namespace. This class encapsulates the functionality required to create, manipulate, and analyze graphs. The graphs are represented internally as adjacency matrices, where each cell `[i][j]` represents the weight of the edge between vertices `i` and `j`.
+
+### Class Members
+
+- **`graph`**: A 2D vector representing the adjacency matrix of the graph.
+- **`isDirected`**: A boolean flag indicating whether the graph is directed or not.
+- **`containsNegativeEdge`**: A boolean flag indicating whether the graph contains negative edges.
+
+### Constructor
+
+Initializes the 2D vector of representing the graph.
+Initializes the `isDirected` as `false`, assuming each graph is undirected untill proved otherwise.
+Initializes the `isDirected` as `false`, assuming each graph has positive edges untill proved otherwise.
+
+
+
+### Member Functions
+
+#### `size()`
+Returns the number of vertices in the graph.
+
+#### `get_edge(i, j)`
+Returns the weight of the edge between vertices `i` and `j`.
+
+#### `at(i)`
+Returns the adjacency list of vertex `i`.
+
+#### `isDirectedGraph()`
+Returns `true` if the graph is directed, `false` otherwise.
+
+#### `isContainsNegativeEdge()`
+Returns `true` if the graph contains negative edges, `false` otherwise.
+
+#### `MakeUndirectedGraph(Graph g)`
+Creates an undirected graph from a directed graph. It copies the edges from the original graph to the new graph in both directions and marks the new graph as undirected.
+
+#### `loadGraph(std::vector<std::vector<int>> g)`
+Loads a graph from a given matrix. It checks for validity conditions such as non-emptiness, square matrix, symmetry (for undirectedness), and existence of negative edges. Throws an exception if any condition is not met.
+
+#### `printGraph()`
+Prints the graph as a matrix and outputs the number of vertices and edges.
+
+### Example Usage
+
+
+# Graph Algorithms Implementation
+
+This class contains an implementation of various graph algorithms including Dijkstra's algorithm, Bellman-Ford algorithm, Depth-First Search (DFS), and Breadth-First Search (BFS). These algorithms are implemented within the `ariel` namespace under `Algorithms` and are designed to work with a custom `Graph` class.
+
+
+## Functions Overview
+
+### `isConnected`
+Checks if the graph is connected.
+In order to check if the graph is connected and not just strongly connected, the function creates a new undirected graph. and run a Depth First Search (DFS) algorithm on that graph.
+Afterwards, the function checks if there is a node that wasn't visited.
+If there is a node that was not visited, the graph is not connected. otherwise, it is.
+
+### `shortestPath`
+Finds the shortest path between two nodes in the graph, using either Dijkstra's or Bellman-Ford algorithm based on the presence of negative edges.
+If there isn't a negative cycle, the function will return a string containing the nodes in the shortest path from the src node to the dst node.
+
+### `isContainsCycle`
+Checks if the graph contains a cycle.
+The function uses Depth First Search (DFS) to check if the graph contains a cycle (if there is a back-edge, there is a cycle).
+If a cycle exists in the graph, the function will return a string containing the nodes in the cycle.
+
+
+### `isBipartite`
+Checks if the graph is bipartite.
+The function uses Breadth First Search (BFS) to color the graph in two colors (RED and BLUE).
+If the graph is 2-colorable, it is bipartite.
+If the graph is bipartite, the function returns a string containing the division of the graph to 2 sets of vertices.
+otherwise, it will return "0".
+
+### `negativeCycle`
+Checks if the graph contains a negative cycle.
+Note: The function won't work on directed graphs that contain a negative cycle.
+The function uses the Bellman-Ford algorithm to check if the graph contains a negative cycle.
+If it does, a string with the nodes in the negative cycle will be returned.
+
+## Contributing
+
+Contributions are welcome Please feel free to submit pull requests or open issues for discussion.
+
+## License
+
+This project is licensed under the MIT License.
+
