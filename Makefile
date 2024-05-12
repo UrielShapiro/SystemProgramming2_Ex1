@@ -9,6 +9,11 @@ OBJECTS=$(subst .cpp,.o,$(SOURCES))
 
 all: demo test
 
+debug:
+	$(CXX) $(CXXFLAGS) --compile Algorithms.cpp -o Algorithms.o -DDEBUG
+	make test
+	-./test			# ignore code 1 that test returns
+
 run: demo
 	./$^
 
