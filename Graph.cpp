@@ -68,7 +68,7 @@ Graph ariel::Graph::MakeUndirectedGraph(Graph g)
     * The function checks if the matrix contains negative edges.
     * The function checks if the distance from a vertex to itself isn't 0.
 */
-void ariel::Graph::loadGraph(std::vector<std::vector<int>> g)
+void ariel::Graph::loadGraph(const std::vector<std::vector<int>> g)
 {
     if (g.size() == 0)
     {

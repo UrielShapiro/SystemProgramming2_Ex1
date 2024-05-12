@@ -30,6 +30,7 @@ tidy:
 valgrind: demo test
 	valgrind --tool=memcheck $(VALGRIND_FLAGS) ./demo 2>&1 | { egrep "lost| at " || true; }
 	valgrind --tool=memcheck $(VALGRIND_FLAGS) ./test 2>&1 | { egrep "lost| at " || true; }
+	-make clean
 
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) --compile $< -o $@

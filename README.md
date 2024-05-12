@@ -122,11 +122,3 @@ Note: The function won't work on directed graphs that contain a negative cycle.
 The function uses the Bellman-Ford algorithm to check if the graph contains a negative cycle.
 If it does, a string with the nodes in the negative cycle will be returned.
 
-## Contributing
-
-Contributions are welcome Please feel free to submit pull requests or open issues for discussion.
-
-## License
-
-This project is licensed under the MIT License.
-

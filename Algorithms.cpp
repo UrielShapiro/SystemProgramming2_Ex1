@@ -553,25 +553,25 @@ namespace ariel
         }
 
         // If reached here, the graph is bipartite.
-        std::string A = "A={";
-        std::string B = "B={";
+        std::string Set_A = "A={";
+        std::string Set_B = "B={";
         for (size_t i = 0; i < g.size(); i++)
         {
             if (colors[i] == RED)
             {
-                A += std::to_string(i) + ", ";
+                Set_A += std::to_string(i) + ", ";
             }
             else    // If the color is BLUE.
             {
-                B += std::to_string(i) + ", ";
+                Set_B += std::to_string(i) + ", ";
             }
         }
         // Remove the last comma and space in both strings:
-        A = A.substr(0, A.size() - 2);
-        B = B.substr(0, B.size() - 2);
-        A += "}";
-        B += "}";
-        return "The graph is bipartite: " + A + ", " + B;
+        Set_A = Set_A.substr(0, Set_A.size() - 2);
+        Set_B = Set_B.substr(0, Set_B.size() - 2);
+        Set_A += "}";
+        Set_B += "}";
+        return "The graph is bipartite: " + Set_A + ", " + Set_B;
     }
 
     /*
