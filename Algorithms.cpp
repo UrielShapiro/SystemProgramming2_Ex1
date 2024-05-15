@@ -112,10 +112,7 @@ namespace ariel
     {
         dist[src] = 0; // The distance from the start node to itself is 0.
         parents[src] = INFINITY;
-        if (g.size() == 1)
-        {
-            return false;
-        }
+        
         for (size_t times = 0; times < g.size() - 1; times++)
         {
             for (size_t i = 0; i < g.size(); i++)

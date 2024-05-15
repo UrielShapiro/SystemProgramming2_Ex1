@@ -62,6 +62,17 @@ TEST_CASE("Test isConnected - Connected")
         {2, -18, 0, 0}};
     g.loadGraph(graph5);
     CHECK(ariel::Algorithms::isConnected(g) == true);
+
+    vector<vector<int>> graph7 = {{0}};
+    g.loadGraph(graph7);
+    CHECK(ariel::Algorithms::isConnected(g) == true);
+
+    vector<vector<int>> graph8 = {
+        {0, 0, 3},
+        {0, 0, 0},
+        {0, 3, 0}};
+    g.loadGraph(graph8);
+    CHECK(ariel::Algorithms::isConnected(g) == true);
 }
 
 TEST_CASE("isConnected - Not Connected")
@@ -156,6 +167,18 @@ TEST_CASE("Test shortestPath - Positive edges")
         {0, 0, 0, 0}};
     g.loadGraph(graph4);
     CHECK(ariel::Algorithms::shortestPath(g, 0, 2) == "0->1->2");
+
+    vector<vector<int>> graph5 = {{0}};
+    g.loadGraph(graph5);
+    CHECK(ariel::Algorithms::shortestPath(g, 0, 0) == "0");
+
+    vector<vector<int>> graph6 = {
+        {0, 43, 0, 35},
+        {0, 0, 40, 0},
+        {0, 0, 0, 31},
+        {0, 0, 0, 0}};
+    g.loadGraph(graph6);
+    CHECK(ariel::Algorithms::shortestPath(g, 2, 2) == "0");
 }
 
 TEST_CASE("Test shortestPath - Negative edges")
@@ -184,6 +207,28 @@ TEST_CASE("Test shortestPath - Negative edges")
         {0, 0, 0, 0}};
     g.loadGraph(graph2);
     CHECK(ariel::Algorithms::shortestPath(g, 0, 2) == "0->1->2");
+}
+
+TEST_CASE("Shortest Path - Negative Cycle")
+{
+    ariel::Graph g;
+    vector<vector<int>> graph = {
+        {0, 0, 0, 2, 0},
+        {0, 0, -1, -1, 0},
+        {0, -1, 0, -1, 0},
+        {2, -1, -1, 0, 0},
+        {0, 0, 0, 0, 0}};
+    g.loadGraph(graph);
+    CHECK(ariel::Algorithms::shortestPath(g, 0, 4) == "-1");
+
+
+    vector<vector<int>> graph1 = {
+       { 0, -5, -5, 0},
+       { -5, 0, 0, -5},
+       { -5, 0, 0, -5},
+        {0, -5, -5, 0}};
+    g.loadGraph(graph1);
+    CHECK(ariel::Algorithms::shortestPath(g, 0, 3) == "-1");
 }
 
 TEST_CASE("Test isContainsCycle - Not contained")
@@ -415,7 +460,7 @@ TEST_CASE("Test negativeCycle - Not negative cycles")
     CHECK(ariel::Algorithms::negativeCycle(g) == "The graph does not contain a negative cycle.");
 
     vector<vector<int>> graph4 = {
-       {0, 5, 1, 0},
+        {0, 5, 1, 0},
         {0, 0, 0, -10},
         {1, 0, 0, 30},
         {0, -10, 30, 0}};

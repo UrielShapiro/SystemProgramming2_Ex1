@@ -3,9 +3,12 @@
 CXX=g++
 CXXFLAGS=-std=c++11 -Werror -Wsign-conversion -g
 VALGRIND_FLAGS=-v --leak-check=full --show-leak-kinds=all  --error-exitcode=99
+GCOV_FLAGS = -fprofile-arcs -ftest-coverage
 
 SOURCES=Graph.cpp Algorithms.cpp
-OBJECTS=$(subst .cpp,.o,$(SOURCES))
+Algorithms = Algorithms
+Graph = Graph
+OBJECTS=Graph.o Algorithms.o
 
 all: demo test
 
@@ -18,11 +21,27 @@ run: demo
 	./$^
 
 demo: Demo.o $(OBJECTS)
-	$(CXX) $(CXXFLAGS) $^ -o demo
+	$(CXX) $(CXXFLAGS) $^ -o demo -lgcov
 
 test: TestCounter.o Test.o $(OBJECTS)
-	$(CXX) $(CXXFLAGS) $^ -o test
-	./test
+	$(CXX) $(CXXFLAGS) $^ -o test -lgcov
+
+TestCounter.o: TestCounter.cpp
+	$(CXX) $(CXXFLAGS) $(GCOV_FLAGS) -c -o $@ $^
+
+$(Algorithms).o: $(Algorithms).cpp $(Algorithms).hpp
+	$(CXX) $(GCOV_FLAGS) $(CXXFLAGS) -c -o $@ $<
+
+$(Graph).o: $(Graph).cpp $(Graph).hpp
+	$(CXX) $(GCOV_FLAGS) $(CXXFLAGS) -c -o $@ $<
+
+gcov: 
+	make all
+	-./test
+	-gcov $(Algorithms).cpp
+	-gcov $(Graph).cpp
+	-cat $(Algorithms).cpp.gcov
+	make clean
 
 tidy:
 	clang-tidy $(SOURCES) -checks=bugprone-*,clang-analyzer-*,cppcoreguidelines-*,performance-*,portability-*,readability-*,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-cppcoreguidelines-owning-memory --warnings-as-errors=-* --
@@ -36,6 +55,6 @@ valgrind: demo test
 	$(CXX) $(CXXFLAGS) --compile $< -o $@
 
 clean:
-	rm -f *.o demo test
+	rm -f *.o *.gcov *.gcda *.gcno demo test
 
-.PHONY: all run demo test clean
+.PHONY: all run demo test clean gcov valgrind
