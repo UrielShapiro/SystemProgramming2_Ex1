@@ -18,6 +18,10 @@
 
 - Compiles the `TestCounter.o`, `Test.o`, and other object files into the `test` executable and runs it.
 
+### `gcov`
+
+- Runs gcov on the `tests` and prints `Algorithms.cpp.gcov`.
+
 ### `tidy`
 
 - Runs `clang-tidy` on the source files with a set of predefined checks for bugs, performance, portability, and readability. It treats warnings as errors except for those explicitly allowed.

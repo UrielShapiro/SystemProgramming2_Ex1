@@ -1,4 +1,7 @@
-#!make -f
+# Last digits of ID: 9745
+# Mail: uriel1999@gmail.com
+
+
 
 CXX=g++
 CXXFLAGS=-std=c++11 -Werror -Wsign-conversion -g

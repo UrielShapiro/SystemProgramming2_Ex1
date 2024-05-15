@@ -1,7 +1,7 @@
-/*
- * Demo program for Exercise 2.
- * Author: Benjamin Saldman.
- */
+/**
+ * Last digits of ID: 9745
+ * Mail: uriel1999@gmail.com
+*/
 
 #include "Graph.hpp"
 #include "Algorithms.hpp"

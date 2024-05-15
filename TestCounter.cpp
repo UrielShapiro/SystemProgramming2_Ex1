@@ -1,4 +1,7 @@
-// #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+/**
+ * Last digits of ID: 9745
+ * Mail: uriel1999@gmail.com
+*/
 
 #define DOCTEST_CONFIG_IMPLEMENT
 #include "doctest.h"

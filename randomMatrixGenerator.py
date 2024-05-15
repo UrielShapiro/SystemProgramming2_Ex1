@@ -1,3 +1,6 @@
+# Last digits of ID: 9745
+# Mail: uriel1999@gmail.com
+
 import random
 
 def generate_random_adjacency_matrix(vertices, density):
