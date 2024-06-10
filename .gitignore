@@ -6,3 +6,6 @@
 run
 test
 demo
+
+*.gcda
+*.gcno

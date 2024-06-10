@@ -71,13 +71,6 @@ TEST_CASE("Test isConnected - Connected")
     vector<vector<int>> graph7 = {{0}};
     g.loadGraph(graph7);
     CHECK(ariel::Algorithms::isConnected(g) == true);
-
-    vector<vector<int>> graph8 = {
-        {0, 0, 3},
-        {0, 0, 0},
-        {0, 3, 0}};
-    g.loadGraph(graph8);
-    CHECK(ariel::Algorithms::isConnected(g) == true);
 }
 
 TEST_CASE("isConnected - Not Connected")
@@ -108,6 +101,13 @@ TEST_CASE("isConnected - Not Connected")
         {0, 0, 0, 22, 0, -23},
         {0, 0, 0, 0, -23, 0}};
     g.loadGraph(graph3);
+    CHECK(ariel::Algorithms::isConnected(g) == false);
+
+    vector<vector<int>> graph8 = {
+        {0, 0, 3},
+        {0, 0, 0},
+        {0, 3, 0}};
+    g.loadGraph(graph8);
     CHECK(ariel::Algorithms::isConnected(g) == false);
 
     vector<vector<int>> graph4 = {

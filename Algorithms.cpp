@@ -1,7 +1,7 @@
 /**
  * Last digits of ID: 9745
- * Mail: uriel1999@gmail.com
-*/
+ * Email address: uriel1999@gmail.com
+ */
 
 #include "Graph.hpp"
 #include <vector>
@@ -18,9 +18,10 @@ using ariel::Graph;
 
 namespace ariel
 {
-
-    //                                  HELPER FUNCTIONS:
-
+    /*
+     * A function that finds the neighbor with the minimum distance from the source.
+     * @return The index of the neighbor with the minimum distance from the source.
+     */
     size_t Algorithms::min_neighbor(const std::vector<int> &dist, const std::vector<bool> &converged)
     {
         int min = INFINITY;
@@ -28,7 +29,7 @@ namespace ariel
 
         for (size_t vertex_i = 0; vertex_i < dist.size(); vertex_i++) // Looping through the vertices
         {
-            if (converged[vertex_i] == false && dist[vertex_i] < min) // If the neighbor was not visited yet and the distance
+            if (!converged[vertex_i] && dist[vertex_i] < min) // If the neighbor was not visited yet and the distance
             // from the source is less or equal to the minimum distance.
             // This is the neighbor with the current minimum distance from the source.
             {
@@ -42,6 +43,10 @@ namespace ariel
         return min_index; // Returning the index of the neighbor with the minimum distance from the source.
     }
 
+    /*
+     * A function that checks if a vertex should be relaxed or not.
+     * @return True if the vertex should be relaxed, False otherwise.
+     */
     bool Algorithms::should_relax(size_t u, size_t v, int weight, std::vector<int> dist)
     {
         // If the vertex was visited (it's distance from the origin was updated)
@@ -54,6 +59,11 @@ namespace ariel
         return false;
     }
 
+    /*
+     * Function that implements Dijkstra's single source shortest path algorithm
+     * for a graph represented using adjacency matrix
+     * @return A vector that stores the shortest distance from the source to each vertex in the graph.
+     */
     void Algorithms::dijkstra(Graph g, size_t src, size_t end, std::vector<int> &dist, std::vector<size_t> &parents)
     {
         std::vector<bool> converged(g.size(), false); // converged[i] will be true if vertex i is included in shortest path tree
@@ -92,7 +102,12 @@ namespace ariel
             }
         }
     }
-
+    /*
+     * This function relaxes the edge between two nodes in the graph.
+     * If the distance from the source node to the current node is shorter than the current distance,
+     * the function will update the distance to the new shorter distance (in the distance vector).
+     * @return true if the distance was updated, false otherwise.
+     */
     bool Algorithms::relax(Graph g, size_t v, size_t u, std::vector<int> &distances, std::vector<size_t> &parents)
     {
         if (distances[u] == INFINITY)
@@ -112,12 +127,19 @@ namespace ariel
         }
         return false;
     }
-
+    /*
+     * This function implements the Bellman-Ford algorithm to find the shortest path in a graph.
+     * @return True if the graph contains a negative cycle, False otherwise.
+     */
     bool Algorithms::BellmanFord(Graph g, size_t src, std::vector<int> &dist, std::vector<size_t> &parents, std::vector<size_t> &cycleNodes)
     {
-        dist[src] = 0; // The distance from the start node to itself is 0.
-        parents[src] = INFINITY;
-        
+        dist[src] = 0;                      // The distance from the start node to itself is 0.
+        parents[src] = INFINITY;            // Set the parent of the src vertex to INF
+        if (g.size() == 1 || g.size() == 0) // If the graph size is 1 or 0, it definitly won't have a negative cycle
+        {
+            return false;
+        }
+        // Run N-1 times:
         for (size_t times = 0; times < g.size() - 1; times++)
         {
             for (size_t i = 0; i < g.size(); i++)
@@ -147,7 +169,7 @@ namespace ariel
                 if (g.get_edge(i, j) != 0 && (parents[j] != i && !g.isDirectedGraph()) && relax(g, j, i, dist, parents))
                 {
 #ifdef DEBUG
-                    std:: << "Negative cycle found" << std::endl;
+                    std::cout << "Negative cycle found" << std::endl;
                     std::cout << "The cycle is: " << i << " -> " << j << std::endl;
                     std::cout << "Parents: ";
                     for (size_t p : parents)
@@ -169,15 +191,18 @@ namespace ariel
         return false;
     }
 
-    void Algorithms::DFS(Graph g, size_t current, size_t parent, std::vector<bool> &visited,
-                         std::vector<bool> &inStack)
+    /*
+     * This function performs a Depth First Search (DFS) on the graph to check connactivity.
+     * This function is used to check if the graph is strongly connected (1 SCC).
+     */
+    void Algorithms::DFS(Graph g, size_t current, size_t parent, std::vector<bool> &visited)
     {
 #ifdef DEBUG
         std::cout << "Running DFS with: " << current << std::endl;
 #endif
         visited[current] = true;
-        inStack[current] = true;
 
+        // Iterate over all of the current's neighbours
         for (size_t neighbor = 0; neighbor < g.at(current).size(); neighbor++)
         {
             if (!g.isDirectedGraph() && neighbor == parent) // Skip the parent node in undirected graphs.
@@ -187,21 +212,25 @@ namespace ariel
 #endif
                 continue;
             }
-            if (neighbor == current)
+            if (neighbor == current) // Skip the current node
             {
-                continue; // Skip the current node - small runtime improvement.
+                continue;
             }
             if (!visited[neighbor] && g.get_edge(neighbor, current) != 0)
             {
 #ifdef DEBUG
                 std::cout << "Running DFS from " << neighbor << ". His parent is: " << current << std::endl;
 #endif
-                DFS(g, neighbor, current, visited, inStack);
+                DFS(g, neighbor, current, visited);
             }
         }
-        inStack[current] = false; // Remove the current node from the stack.
     }
 
+    /*
+     * This function performs a Depth First Search (DFS) on the graph.
+     * It is used to check if the graph contains a cycle.
+     * @return The node in which the cycle starts.
+     */
     size_t Algorithms::DFSCycleCheck(Graph g, size_t current, size_t parent, std::vector<Visited> &visited,
                                      std::vector<size_t> &parents, std::vector<size_t> &cycleNodes)
     {
@@ -213,13 +242,14 @@ namespace ariel
         parents[current] = parent;
         cycleNodes.push_back(current);
 
+        // Iterate over all of the current's neighbours
         for (size_t neighbor = 0; neighbor < g.at(current).size(); neighbor++)
         {
             if (!g.isDirectedGraph() && (neighbor == parent || parents[neighbor] == current)) // Skip the parent node in undirected graphs.
             {
                 continue;
             }
-            if (visited[neighbor] == GREY && g.get_edge(neighbor, current) != 0)
+            if (visited[neighbor] == GREY && g.get_edge(neighbor, current) != 0) // Check if theres a cycle
             {
 #ifdef DEBUG
                 std::cout << "The cycle is: " << current << "->" << neighbor << std::endl;
@@ -234,7 +264,7 @@ namespace ariel
                 std::cout << "Running DFSCycleCheck from " << neighbor << ". His parent is: " << current << std::endl;
 #endif
                 parents[neighbor] = current;
-                if (DFSCycleCheck(g, neighbor, current, visited, parents, cycleNodes) != INFINITY)
+                if (DFSCycleCheck(g, neighbor, current, visited, parents, cycleNodes) != INFINITY) // If there was a cycle found
                 {
                     return current; // Return the node in which the cycle starts.
                 }
@@ -245,6 +275,12 @@ namespace ariel
         return INFINITY;          // Return INFINITY if no cycle was found.
     }
 
+    /*
+     * This function colors the graph using the Breadth First Search (BFS) algorithm.
+     * The function colors the graph nodes in two colors (RED and BLUE) and checks if the graph is bipartite.
+     * Theorom: A graph is bipartite if and only if it is 2-colorable.
+     * @return True if the graph is bipartite, False otherwise.
+     */
     bool Algorithms::BFSColoring(Graph g, size_t start, std::vector<Color> &colors)
     {
         std::queue<size_t> Q;
@@ -261,7 +297,7 @@ namespace ariel
 #ifdef DEBUG
                 std::cout << "Checking edge: " << current << " -> " << i << std::endl;
 #endif
-                if (g.get_edge(current, i) != 0 && colors[i] == UNCOLORED)
+                if (g.get_edge(current, i) != 0 && colors[i] == UNCOLORED) // If an unvisited neighbour reached
                 {
                     Q.push(i);                                       // Push the neighbor to the queue.
                     colors[i] = colors[current] == RED ? BLUE : RED; // Color the neighbor with the opposite color.
@@ -269,6 +305,8 @@ namespace ariel
                     std::cout << "Coloring node: " << i << " with: " << colors[i] << std::endl;
 #endif
                 }
+
+                // If there is an edge between 2 vertices with the same color, return false
                 if (i != current && g.get_edge(current, i) != 0 && colors[i] == colors[current])
                 {
 #ifdef DEBUG
@@ -281,6 +319,10 @@ namespace ariel
         return true;
     }
 
+    /*
+     * This function prints the path from the source node to the end node.
+     * @return The path from the source node to the end node.
+     */
     std::string Algorithms::printPath(size_t src, size_t parent, const std::vector<size_t> parents)
     {
         if (parent == src)
@@ -294,8 +336,11 @@ namespace ariel
         return printPath(src, parents[parent], parents) + "->" + std::to_string(parent);
     }
 
-    //                                  MAIN FUNCTIONS:
-
+    /*
+     * This function checks if the graph is strongly connected.
+     * In order to check if the graph is strongly connected we run DFS on each vertex and check if all of the vertices in the graph were visited.
+     * @return True if the graph is strongly connected, False otherwise.
+     */
     bool Algorithms::isConnected(const Graph g)
     {
         if (g.size() == 0 || g.size() == 1)
@@ -306,30 +351,28 @@ namespace ariel
             return true;
         }
 
-        std::vector<bool> visited(g.size(), false); // Create a visited array for the graph nodes. initialized to false.
-        std::vector<bool> inStack(g.size(), false); // Create a stack array for the graph nodes. initialized to false.
+        // Travarse all of the vertices in the graph and run DFS on each vertex
+        for (size_t i = 0; i < g.size(); i++)
+        {
+            std::vector<bool> visited(g.size(), false); // Create a visited array for the graph nodes. initialized to false.
+            std::vector<bool> inStack(g.size(), false); // Create a stack array for the graph nodes. initialized to false.
 
-        if (g.isDirectedGraph())
-        {
-#ifdef DEBUG
-            std::cout << "The graph is directed" << std::endl;
-#endif
-            Graph undirectedGraph = Graph::MakeUndirectedGraph(g); // Create an undirected graph to check if the graph is connected.
-            DFS(undirectedGraph, 0, INFINITY, visited, inStack);   // Check if start is connected to end.
-        }
-        else
-        {
-            DFS(g, 0, INFINITY, visited, inStack); // Check if start is connected to end.
-        }
+            DFS(g, i, INFINITY, visited);
 
-        auto iter = find(visited.begin(), visited.end(), false);
-        if (iter != visited.end()) // The iterator found a false value in the visited array.
-        {
-            return false; // The graph is not connected.
+            if (std::find(visited.begin(), visited.end(), false) != visited.end()) // If there is a vertex which wasn't visited
+            {
+                return false;
+            }
         }
         return true; // The graph is connected if all nodes are visited
     }
 
+    /*
+     * This function finds the shortest path between two nodes in the graph.
+     * If the graph has no negative edges, The function uses Dijkstra's algorithm to find the shortest path.
+     * Else, the function uses the Bellman-Ford algorithm to find the shortest path.
+     * @return The shortest path between the start and end nodes. if there is no path, the function returns -1.
+     */
     std::string Algorithms::shortestPath(const Graph g, const size_t start, const size_t end)
     {
         if (start == end)
@@ -338,7 +381,6 @@ namespace ariel
         }
 
         std::vector<bool> visited(g.size(), false);
-        std::vector<bool> inStack(g.size(), false);
 
         if (g.isDirectedGraph())
         {
@@ -347,11 +389,11 @@ namespace ariel
 #endif
             Graph undirectedGraph = Graph::MakeUndirectedGraph(g); // Create an undirected graph to check if the graph is connected.
             // Is used to check if the start is connected to the end (without needing it to be strongly connected).
-            DFS(undirectedGraph, start, INFINITY, visited, inStack); // Check if start is connected to end.
+            DFS(undirectedGraph, start, INFINITY, visited); // Check if start is connected to end.
         }
         else
         {
-            DFS(g, start, INFINITY, visited, inStack); // Check if start is connected to end.
+            DFS(g, start, INFINITY, visited); // Check if start is connected to end.
         }
         if (!visited[end])
         {
@@ -437,12 +479,17 @@ namespace ariel
         return path;
     }
 
+    /*
+     * This function checks if the graph contains a cycle.
+     * The function uses Depth First Search (DFS) to check if the graph contains a cycle.
+     * @return The cycle in the graph if it contains a cycle, "0" otherwise.
+     */
     std::string Algorithms::isContainsCycle(Graph g)
     {
         std::vector<Visited> visited(g.size(), WHITE);   // Create a visited array for the graph nodes. initialized to false.
         std::vector<size_t> parents(g.size(), INFINITY); // Create a stack vector for the graph nodes. initialized to false.
         size_t cycle_node;
-        for (size_t i = 0; auto iter = find(visited.begin(), visited.end(), WHITE) != visited.end(); i++)
+        for (size_t i = 0; std::find(visited.begin(), visited.end(), WHITE) != visited.end(); i++)
         {
             if (visited[i] != WHITE) // Skip the visited nodes.
             {
@@ -477,11 +524,17 @@ namespace ariel
         return "0"; // If the graph does not contain a cycle, return false.
     }
 
+    /*
+     * This function checks if the graph is bipartite.
+     * The function uses Breadth First Search (BFS) to color the graph in two colors (RED and BLUE).
+     * Theorom: A graph is bipartite if and only if it is 2-colorable.
+     * @return The sets of vertices if the graph is bipartite, "0" otherwise.
+     */
     std::string Algorithms::isBipartite(Graph g)
     {
         // Create a color vector for the graph nodes. initialized all nodes to UNCOLORED.
         std::vector<Color> colors(g.size(), UNCOLORED);
-        for (size_t i = 0; i < g.size(); i++)
+        for (size_t i = 0; i < g.size(); i++) // Running in a for loop because the graph could be not connected
         {
             if (colors[i] == UNCOLORED)
             {
@@ -514,6 +567,12 @@ namespace ariel
         return "The graph is bipartite: " + Set_A + ", " + Set_B;
     }
 
+    /*
+     * This function checks if the graph contains a negative cycle.
+     * The function won't work on directed graphs that contain a negative cycle.
+     * The function uses the Bellman-Ford algorithm to check if the graph contains a negative cycle.
+     * @return The cycle in the graph if it contains a negative cycle, "0" otherwise.
+     */
     std::string Algorithms::negativeCycle(Graph g)
     {
         if (isContainsCycle(g) == "0" || !g.isContainsNegativeEdge() || g.size() < 3)

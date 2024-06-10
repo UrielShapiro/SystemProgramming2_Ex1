@@ -63,7 +63,7 @@ namespace ariel
          * This function performs a Depth First Search (DFS) on the graph to check connactivity.
          * This function is used to check if the graph is strongly connected (1 SCC).
          */
-        static void DFS(Graph g, size_t current, size_t parent, std::vector<bool> &visited, std::vector<bool> &inStack);
+        static void DFS(Graph g, size_t current, size_t parent, std::vector<bool> &visited);
 
         /*
          * This function colors the graph using the Breadth First Search (BFS) algorithm.
